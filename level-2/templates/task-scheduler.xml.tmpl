@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-16"?>
+<!--
+  Windows Task Scheduler template.
+  Import via: schtasks /create /tn "TaskName" /xml "path\to\this.xml"
+  Or import through the Task Scheduler GUI: Action > Import Task
+
+  Replace:
+    - TASK-NAME: your task name
+    - USERNAME: your Windows username
+    - SCRIPT-PATH: path to your script
+    - Trigger settings as needed
+-->
+<Task version="1.4"
+  xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Description>SecondBrain automation: TASK-NAME</Description>
+  </RegistrationInfo>
+  <Triggers>
+    <!--
+    OPTION A: Daily at specific time
+    -->
+    <CalendarTrigger>
+      <StartBoundary>2026-01-01T10:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByDay>
+        <DaysInterval>1</DaysInterval>
+      </ScheduleByDay>
+    </CalendarTrigger>
+
+    <!--
+    OPTION B: Weekly (e.g., Sunday)
+    <CalendarTrigger>
+      <StartBoundary>2026-01-05T20:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByWeek>
+        <WeeksInterval>1</WeeksInterval>
+        <DaysOfWeek>
+          <Sunday />
+        </DaysOfWeek>
+      </ScheduleByWeek>
+    </CalendarTrigger>
+    -->
+
+    <!--
+    OPTION C: On workstation unlock
+    <SessionStateChangeTrigger>
+      <Enabled>true</Enabled>
+      <StateChange>SessionUnlock</StateChange>
+    </SessionStateChangeTrigger>
+    -->
+  </Triggers>
+  <Principals>
+    <Principal>
+      <UserId>USERNAME</UserId>
+      <LogonType>InteractiveToken</LogonType>
+      <RunLevel>LeastPrivilege</RunLevel>
+    </Principal>
+  </Principals>
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <AllowHardTerminate>true</AllowHardTerminate>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <RunOnlyIfNetworkAvailable>false</RunOnlyIfNetworkAvailable>
+    <AllowStartOnDemand>true</AllowStartOnDemand>
+    <Enabled>true</Enabled>
+    <Hidden>false</Hidden>
+    <ExecutionTimeLimit>PT1H</ExecutionTimeLimit>
+    <Priority>7</Priority>
+    <RestartOnFailure>
+      <Interval>PT5M</Interval>
+      <Count>3</Count>
+    </RestartOnFailure>
+  </Settings>
+  <Actions>
+    <Exec>
+      <Command>wsl</Command>
+      <Arguments>bash SCRIPT-PATH</Arguments>
+    </Exec>
+  </Actions>
+</Task>

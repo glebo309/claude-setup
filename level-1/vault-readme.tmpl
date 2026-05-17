@@ -1,0 +1,88 @@
+# SecondBrain -- Vault Structure
+
+---
+
+## Philosophy
+
+This vault is organized around **three life domains** plus a capture system:
+
+1. **`_RESEARCH/`** -- Science and professional work
+2. **`_CREATIVE/`** -- Published output and creative projects
+3. **`_PERSONAL/`** -- Life management (journal, goals, documents, reading, notes)
+4. **`_INBOX/`** -- Quick capture from phone or anywhere (processed weekly)
+
+Supporting folders:
+- **`_SYSTEM/`** -- Vault infrastructure (templates, docs, automation outputs)
+- **`Templates/`** -- Obsidian note templates
+- **`data/`** -- Vault-wide attachments (pasted images, PDFs, etc.)
+
+---
+
+## Decision Rule: Where Does a Note Go?
+
+| Question | Folder |
+|----------|--------|
+| Is this about my work, research, papers, or professional career? | `_RESEARCH/` |
+| Is this something I'm creating for others to read/see? | `_CREATIVE/` |
+| Is this about my personal life, goals, health, or self-development? | `_PERSONAL/` |
+| Is this a quick thought captured on my phone? | `_INBOX/` |
+| Not sure? | `_INBOX/` -- sort it later |
+
+---
+
+## Source Workflow
+
+The core pattern for working with AI on knowledge-intensive tasks:
+
+1. **Input** -- Pick up a source (book, podcast, paper, article, note from `_INBOX/`)
+2. **Convert** -- Convert to markdown if needed
+3. **Place** -- Drop in the right `Sources/` folder
+4. **Analyze** -- Point AI at the source + target project. AI extracts and connects.
+5. **Output** -- AI writes a `NOTES_` file next to the source, or directly into the project.
+
+### File Convention Per Source
+
+```
+Sources/{type}/SourceName/
+├── SourceName.md          # Full markdown text
+├── SourceName.pdf         # Original file (optional)
+└── NOTES_SourceName.md    # AI-extracted notes / analysis
+```
+
+Short sources (podcasts, articles) can be flat files without a subfolder.
+
+---
+
+## YAML Frontmatter Standard
+
+**All new notes must include YAML frontmatter:**
+
+```yaml
+---
+created: YYYY-MM-DD
+tags:
+  - domain-tag
+  - content-tag
+type: note-type
+---
+```
+
+### Optional Fields
+
+| Field | Description |
+|-------|-------------|
+| `updated` | Last modification date |
+| `status` | Development status (draft, active, complete, archived) |
+| `related` | Links to related notes |
+| `project` | Associated project |
+
+---
+
+## Maintenance Rules
+
+1. **Weekly:** Process `_INBOX/` -- move notes to their domain folder
+2. **YAML frontmatter** on every new note
+3. **Sources** go in domain `Sources/` folders, not in `Notes/`
+4. **Small thought** on existing note -> add a dated section in the same note
+5. **Substantial development** -> create a new note with YAML and link to the original
+6. **When in doubt**, put it in `_INBOX/`

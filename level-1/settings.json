@@ -1,0 +1,77 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(npm run *)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(head:*)",
+      "Bash(wc:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(curl:*)",
+      "Bash(chmod +x:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git reset:*)",
+      "Bash(git tag:*)",
+      "Bash(ps:*)",
+      "Bash(uv run:*)",
+      "Bash(uv lock:*)",
+      "WebSearch"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(rmdir *)",
+      "Bash(wget *)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "model": "claude-opus-4-6",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "VAULT=\"$HOME/Documents/SecondBrain\"; TODAY=$(date +%Y-%m-%d); YEAR=${TODAY%%-*}; JOURNAL=\"$VAULT/_PERSONAL/Journal/$YEAR/$TODAY.md\"; SURFACE=\"$VAULT/Daily Briefing.md\"; if echo \"$CLAUDE_FILE_PATHS\" | grep -q \"$JOURNAL\"; then cp \"$JOURNAL\" \"$SURFACE\" 2>/dev/null; fi",
+            "async": true
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh",
+    "padding": 0
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "context7@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  },
+  "effortLevel": "high",
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "dark-daltonized",
+  "voiceEnabled": true
+}

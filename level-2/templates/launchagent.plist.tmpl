@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Unique identifier for this job. Convention: com.USERNAME.JOB-NAME -->
+    <key>Label</key>
+    <string>com.USERNAME.JOB-NAME</string>
+
+    <!-- The script to run -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/zsh</string>
+        <string>/Users/USERNAME/.claude/scripts/YOUR-SCRIPT.sh</string>
+    </array>
+
+    <!--
+    TRIGGER: pick ONE of the following trigger types.
+    Delete the ones you don't use.
+    -->
+
+    <!-- OPTION A: Run at specific times (scheduled pattern) -->
+    <!-- Daily at 10:00 AM -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>10</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <!-- OPTION B: Run when files change (file-watch pattern) -->
+    <!--
+    <key>WatchPaths</key>
+    <array>
+        <string>/Users/USERNAME/Documents/SecondBrain/_RESEARCH</string>
+        <string>/Users/USERNAME/Documents/SecondBrain/_INBOX</string>
+    </array>
+    <key>ThrottleInterval</key>
+    <integer>120</integer>
+    -->
+
+    <!-- OPTION C: Run at boot and keep alive (persistent service pattern) -->
+    <!--
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    -->
+
+    <!-- Logging (always include) -->
+    <key>StandardOutPath</key>
+    <string>/tmp/JOB-NAME.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/JOB-NAME.err</string>
+</dict>
+</plist>

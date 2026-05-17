@@ -1,0 +1,89 @@
+# SecondBrain Vault -- Claude Code Guide
+
+**Owner:** __USER_NAME__ -- __USER_ROLE__ (__USER_DOMAIN__)
+**Platform:** Obsidian (macOS + mobile)
+
+## Vault Structure
+
+Three life domains + capture system:
+
+| Folder | Purpose | Decision rule |
+|--------|---------|---------------|
+| `_RESEARCH/` | Lab work, papers, protocols, academic career | Science or work-related |
+| `_CREATIVE/` | Published output, philosophy, websites, writing | Created for others to see |
+| `_PERSONAL/` | Journal, goals, health, self-dev, hobbies | Private life |
+| `_INBOX/` | Quick capture, unprocessed | Unsure where it goes |
+| `_SYSTEM/` | Vault infrastructure (templates, attachments, dashboards, docs) | Not user-facing content |
+
+**Deep documentation:** See [[README]] for full folder trees. See [[AI_WORKFLOW]] for the source processing workflow and MCP setup.
+
+## File Conventions
+
+### YAML frontmatter (required on all new notes)
+```yaml
+---
+created: YYYY-MM-DD
+tags:
+  - domain-tag
+  - content-tag
+type: note-type
+---
+```
+Optional fields: `updated`, `status` (someday/open/active/complete), `related`, `project`
+
+### Naming
+- **`T_` prefix** for board thread files (deliverables tracked on the kanban board)
+- **`NOTES_` prefix** for AI-generated analysis files, placed next to their source
+- **Wikilinks:** use `[[FileName]]` format (not `[[folder/file]]`)
+
+### Source processing convention
+```
+Sources/{type}/SourceName/
+  SourceName.md          # Full markdown text
+  SourceName.pdf         # Original (optional)
+  NOTES_SourceName.md    # AI-extracted notes
+```
+Short sources (podcasts, articles) can be flat files without a subfolder.
+
+## Project Board
+
+Kanban board at `Projects.base` (Base Board plugin). Three views: Board (by status), Projects (by project), All Threads (table).
+
+**Hierarchy:** tag (category/color) > project > thread (T_ file / board card) > tasks (#due/#done)
+
+**Thread frontmatter:**
+```yaml
+status: active
+project: "ProjectName"
+tags:
+  - research
+```
+
+- Threads are deliverables with a finish line that move across the board (someday > open > active > complete)
+- Projects never move; they live in domain dashboards
+- Only `status` + `project` + `tags` needed; card title IS the thread name
+
+## Behavior
+
+- When a request is ambiguous, state your assumptions and ask before acting. Do not guess.
+- Do the minimum needed. No speculative features, no unrequested abstractions, no cleanup of adjacent code.
+- Change only what was asked for. Do not refactor, rename, or reorganize things you were not asked to touch.
+- If you are unsure where something goes, which format to use, or what scope the user intends, ask. One clarifying question costs less than redoing the work.
+- **CRITICAL: wikilink format depends on context.**
+  - **In terminal output (chat responses):** use backtick-wrapped wikilinks `[[FileName]]` so they render as blue highlighted text. Zero exceptions for vault file references.
+  - **In markdown files written to the vault:** use plain [[FileName]] with NO backticks. Backticks break Obsidian's native wikilink rendering and make links unclickable. Zero exceptions.
+  - Both rules apply ONLY to vault files, not to Claude memory files or config files.
+
+## Rules
+
+- Always include YAML frontmatter on new notes
+- Place sources in the domain-appropriate `Sources/` folder, not in `Notes/`
+- Never restructure existing folders without asking
+- Never dump files into `Notes/` -- find the right home or use `_INBOX/`
+- Never mix domains (research source in personal folder, etc.)
+- No emojis in files
+- No em dashes or double-hyphen substitutes. Rewrite sentences instead.
+- Small new thought on existing note -> add a dated section in the same note
+- Substantial new development -> create a new note with YAML and link to the original
+- Use `#due/YYYY-MM-DD` inline for deadlines. Always ISO format.
+- When a task is done, change `#due/` to `#done/YYYY-MM-DD` (date completed). Never delete, always convert.

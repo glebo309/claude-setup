@@ -1,0 +1,141 @@
+---
+created: 2026-01-01
+tags:
+  - system
+  - workflow
+  - ai
+type: system
+---
+# SecondBrain -- AI Workflow Primer
+
+**Paste this at the start of a new AI chat to prime the session.**
+
+---
+
+## Who You're Working With
+
+__USER_NAME__, __USER_ROLE__ (__USER_DOMAIN__). Works in Obsidian + Claude Code. The AI writes directly into the Obsidian vault (same workspace).
+
+---
+
+## The Vault
+
+```
+SecondBrain/
+├── _RESEARCH/          Science, work, academic career
+│   ├── Sources/        Input material: books/, podcasts/, courses/
+│   ├── Literature/     Paper notes
+│   ├── Ideas/          Research brainstorms
+│   └── ...
+├── _CREATIVE/          Published output, creative projects
+│   ├── Ideas/          Creative seeds
+│   └── ...
+├── _PERSONAL/          Life management, hobbies, self-development
+│   ├── Sources/        Input material: books/, podcasts/, articles/
+│   ├── Journal/        Reflection, journaling
+│   ├── Notes/          Standalone personal notes
+│   └── ...
+├── _INBOX/             Quick capture, processed weekly
+├── Templates/          Obsidian templates
+├── data/               Vault-wide attachments
+└── Dashboard.md        Top-level navigation
+```
+
+**Decision rule:** Research/work -> `_RESEARCH/`. Creating for others -> `_CREATIVE/`. Personal life -> `_PERSONAL/`. Unsure -> `_INBOX/`.
+
+---
+
+## The Source Workflow (Core Pattern)
+
+### 1. Input
+Pick up a source: book, podcast, paper, article, or note from `_INBOX/`.
+Convert to markdown if needed (epub to md, pdf to md, paste transcript).
+
+### 2. Place
+Drop the source in the right `Sources/` folder:
+
+| Source is about... | Put it in... |
+|---|---|
+| Personal (health, hobbies, self-dev) | `_PERSONAL/Sources/{type}/` |
+| Research (science, academic) | `_RESEARCH/Sources/{type}/` or `Literature/` for papers |
+| A specific creative project | That project's own reference folder |
+
+### 3. Convention
+```
+Sources/{type}/SourceName/
+├── SourceName.md          # Full markdown text
+├── SourceName.pdf         # Original (optional)
+└── NOTES_SourceName.md    # AI-extracted notes / analysis
+```
+Short sources (podcasts, articles) can be flat files without a subfolder.
+
+### 4. Analyze
+In an AI chat:
+- Point AI at the source file
+- Point AI at the target project/note
+- Ask AI to extract, compare, synthesize, or comment
+- AI writes output as a `NOTES_` file in Sources, or directly into the project
+
+### 5. Integrate
+The extracted insights live either:
+- As a `NOTES_` file next to the source (for reference)
+- As new content in the relevant project note (for action)
+- As a new note in the project folder (for substantial new developments)
+
+---
+
+## File Conventions
+
+**YAML frontmatter** -- all new notes must start with:
+```yaml
+---
+created: YYYY-MM-DD
+tags:
+  - domain-tag
+  - content-tag
+type: note-type
+---
+```
+
+**`NOTES_` prefix** -- AI-generated analysis files are prefixed with `NOTES_` and placed next to their source.
+
+**Obsidian links** -- use `[[FileName]]` format (not `[[folder/file]]`).
+
+**Small new thought on existing note** -> add a dated section in the same note.
+**Substantial new development** -> create a new note with YAML and link to the original.
+
+---
+
+## How to Interact
+
+**Default behavior:**
+- Be direct and concise
+- Write directly into vault files when asked
+- Use existing file conventions (YAML, `NOTES_` prefix, Obsidian links)
+- Don't create files unless there's a clear reason
+- Don't restructure existing folders
+
+**When analyzing a source:**
+1. Read the source thoroughly
+2. Ask what the target project/note is
+3. Extract only what's relevant to that project
+4. Write output in the agreed location
+5. Use cross-references to connect new insights to existing notes
+
+---
+
+## Deadline Conventions
+
+- `#due/YYYY-MM-DD` inline for active deadlines
+- `#done/YYYY-MM-DD` when completed (date of completion, not original due date)
+- Removing the tag = removing from tracking. Prefer converting to `#done/` for history.
+
+---
+
+## What NOT to Do
+
+- Don't dump files into `Notes/` -- find the right home or use `_INBOX/`
+- Don't create project folders preemptively -- wait until there's real content
+- Don't restructure existing folders without asking
+- Don't add emojis to files
+- Don't mix domains (research source in personal folder, etc.)

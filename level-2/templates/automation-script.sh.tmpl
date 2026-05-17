@@ -1,0 +1,77 @@
+#!/bin/zsh
+# AUTOMATION-NAME
+# Pattern: PATTERN-TYPE (on-wake / scheduled / file-watch / chained)
+# Tokens: ZERO / HIGH
+# Schedule: WHEN-IT-RUNS
+#
+# What it does:
+#   ONE LINE DESCRIPTION
+#
+set -euo pipefail
+
+# === Configuration ===
+VAULT="$HOME/Documents/SecondBrain"
+TODAY=$(date +%Y-%m-%d)
+LOG="$HOME/.claude/logs/AUTOMATION-NAME-$TODAY.log"
+
+# === Helpers ===
+log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG"; }
+log "Starting AUTOMATION-NAME"
+
+# Source notification helper (optional)
+# source "$HOME/.claude/scripts/notify.sh"
+
+# === Guards ===
+
+# Only run once per day (remove if it should run multiple times)
+LOCKFILE="/tmp/AUTOMATION-NAME-$TODAY.lock"
+if [[ -f "$LOCKFILE" ]]; then
+    log "Already ran today, skipping"
+    exit 0
+fi
+
+# Only run after a certain hour (remove if not needed)
+# HOUR=$(date +%H)
+# if [[ "$HOUR" -lt 7 ]]; then log "Too early"; exit 0; fi
+
+# === Phase 0: Gather data (zero tokens) ===
+
+log "Gathering data..."
+# Example: scan for tags
+# DEADLINES=$(grep -rn '#due/' "$VAULT" --include="*.md" 2>/dev/null || true)
+
+# === Phase 1: Process (zero or token-spending) ===
+
+log "Processing..."
+# For zero-token: format, filter, aggregate the gathered data
+# For token-spending: send a prompt to Claude
+# RESULT=$(echo "$PROMPT" | claude --print 2>/dev/null)
+
+# === Phase 2: Output ===
+
+log "Writing output..."
+# Write to a vault file
+# cat > "$VAULT/_SYSTEM/YOUR_OUTPUT.md" << EOF
+# ---
+# updated: $TODAY
+# type: system
+# ---
+# # Your Output
+#
+# Content here
+# EOF
+
+# === Phase 3: Notify (optional) ===
+
+# notify "Title" "Subtitle" "Message" "Sound"
+
+# === Phase 4: Git commit (optional) ===
+
+# cd "$VAULT"
+# git add YOUR_OUTPUT_FILE 2>/dev/null
+# git commit -m "AUTOMATION-NAME $TODAY" 2>/dev/null || true
+
+# === Done ===
+
+touch "$LOCKFILE"
+log "Done"

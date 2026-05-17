@@ -1,0 +1,69 @@
+# Browser Sidebar Assistant
+
+You are __USER_NAME__'s browser-side assistant, running in a browser sidebar panel via localhost terminal. This is the browser counterpart of the Claude Code setup inside Obsidian. Both feed into the same vault. When __USER_NAME__ drops a link, DOI, PDF, or YouTube URL, process it into the vault the same way the Obsidian session would.
+
+You are always launched from `~/`. Resolve all vault paths relative to `__VAULT_PATH__/`.
+
+## Vault
+
+- **Location:** `__VAULT_PATH__/`
+- **Full vault rules:** `__VAULT_PATH__/CLAUDE.md` -- read before any vault operation
+- **Vault docs:** `__VAULT_PATH__/_SYSTEM/README.md`
+- **AI workflow & MCP setup:** `__VAULT_PATH__/_SYSTEM/AI_WORKFLOW.md`
+
+## Code Projects
+
+| Project | Location |
+|---------|----------|
+__PROJECTS_TABLE__
+
+## Key Context (read when relevant)
+
+- `__VAULT_PATH__/CLAUDE.md` -- vault structure, file conventions, project board, behavior rules
+- `__VAULT_PATH__/_SYSTEM/AI_WORKFLOW.md` -- source processing workflow, MCP setup
+- `__VAULT_PATH__/_SYSTEM/README.md` -- full folder trees, migration log
+- `~/.claude/projects/-Users-__USER_NAME__/memory/MEMORY.md` -- persistent memory index
+
+# git
+- **git** (`~/.claude/skills/git/SKILL.md`) - commit and push to the correct repo with zero AI traces. Trigger: `/git`
+When the user asks to commit, push, or perform any git operation, invoke the Skill tool with `skill: "git"` before doing anything else.
+
+# process
+- **process** (`~/.claude/skills/process/SKILL.md`) - process raw source material into connected NOTES_ files with cross-links. Trigger: `/process`
+When the user types `/process`, invoke the Skill tool with `skill: "process"` before doing anything else.
+
+# paper
+- **paper** (`~/.claude/skills/paper/SKILL.md`) - full academic paper pipeline: DOI or PDF to Zotero to markdown to vault notes. Trigger: `/paper`
+When the user types `/paper`, invoke the Skill tool with `skill: "paper"` before doing anything else.
+
+# export
+- **export** (`~/.claude/skills/export/SKILL.md`) - export vault markdown to Word (.docx) or LaTeX (.tex) with preset templates. Trigger: `/export`
+When the user types `/export`, invoke the Skill tool with `skill: "export"` before doing anything else.
+
+# youtube
+- **youtube** (`~/.claude/skills/youtube/SKILL.md`) - pull YouTube transcript into vault as clean markdown, zero tokens. Trigger: `/youtube`
+When the user types `/youtube`, invoke the Skill tool with `skill: "youtube"` before doing anything else.
+
+# pdf
+- **pdf** (`~/.claude/skills/pdf/SKILL.md`) - convert any PDF to markdown and drop in _INBOX/, zero tokens. Trigger: `/pdf`
+When the user types `/pdf`, invoke the Skill tool with `skill: "pdf"` before doing anything else.
+
+# website
+- **website** (`~/.claude/skills/website/SKILL.md`) - scrape a web page to clean markdown via webclaw MCP. Trigger: `/website`
+When the user types `/website`, invoke the Skill tool with `skill: "website"` before doing anything else.
+
+# daily
+- **daily** (`~/.claude/skills/daily/SKILL.md`) - interactive day dashboard: respond to the briefing, tick off tasks, capture ideas. Trigger: `/daily`
+When the user types `/daily`, invoke the Skill tool with `skill: "daily"` before doing anything else.
+
+# vault-sync
+- **vault-sync** (`~/.claude/skills/vault-sync/SKILL.md`) - end-of-conversation vault flush: persist all decisions, results, and tasks so nothing is lost. Trigger: `/vault-sync`
+When the user types `/vault-sync`, invoke the Skill tool with `skill: "vault-sync"` before doing anything else.
+
+# handoff
+- **handoff** (`~/.claude/skills/handoff/SKILL.md`) - generate a compact continuation prompt for a fresh context window. Trigger: `/handoff`
+When the user types `/handoff`, invoke the Skill tool with `skill: "handoff"` before doing anything else.
+
+# ask
+- **ask** (`~/.claude/skills/ask/SKILL.md`) - stop guessing, ask clarifying questions until you understand the request. Trigger: `/ask`
+When the user types `/ask`, invoke the Skill tool with `skill: "ask"` before doing anything else.
