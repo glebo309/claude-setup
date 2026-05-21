@@ -47,7 +47,7 @@ digraph git_flow {
 
 ## Detect the Right Repo
 
-Sub-projects may have their own `.git` (e.g. `glecko.xyz/` inside the vault). Before any git operation:
+Sub-projects may have their own `.git` (e.g. a website folder inside the vault). Before any git operation:
 
 ```bash
 git -C <file-directory> rev-parse --show-toplevel

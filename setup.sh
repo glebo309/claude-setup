@@ -477,10 +477,59 @@ PYEOF
 
 run_level_2() {
     header "Level 2: Automations"
+
+    # --- Daily Briefing ---
     echo ""
-    echo "Level 2 is not a script. It is a guide."
+    info "The daily briefing scans your vault for #due/ deadlines, commitments,"
+    info "and recent notes, then calls Claude to write a morning orientation."
+    info "It fires on laptop wake (via sleepwatcher) and costs ~1 Opus call/day."
     echo ""
-    echo "Read the following files to learn the automation patterns:"
+    if confirm "Install the daily briefing automation?"; then
+        local SCRIPTS_DIR="$HOME/.claude/scripts"
+        mkdir -p "$SCRIPTS_DIR" "$HOME/.claude/logs"
+
+        # Install briefing script with vault path
+        sed -e "s|__VAULT__|${VAULT_PATH}|g" \
+            -e "s|__USER_NAME__|${USER_NAME}|g" \
+            "$REPO_DIR/level-2/scripts/daily-briefing.sh" > "$SCRIPTS_DIR/daily-briefing.sh"
+        chmod +x "$SCRIPTS_DIR/daily-briefing.sh"
+        ok "daily-briefing.sh installed"
+
+        # Install wakeup trigger
+        cp "$REPO_DIR/level-2/scripts/wakeup.sh" "$HOME/.wakeup"
+        chmod +x "$HOME/.wakeup"
+        ok "~/.wakeup installed (sleepwatcher trigger)"
+
+        # Install LaunchAgent (boot fallback)
+        local PLIST_NAME="com.$(whoami).daily-briefing"
+        local PLIST_PATH="$HOME/Library/LaunchAgents/${PLIST_NAME}.plist"
+        if [[ -f "$PLIST_PATH" ]]; then
+            ok "Briefing LaunchAgent already exists"
+        else
+            sed -e "s|__LABEL__|${PLIST_NAME}|g" \
+                -e "s|__HOME__|${HOME}|g" \
+                "$REPO_DIR/level-2/scripts/launchagent-briefing.plist.tmpl" > "$PLIST_PATH"
+            launchctl load "$PLIST_PATH" 2>/dev/null || true
+            ok "Briefing LaunchAgent created and loaded"
+        fi
+
+        # Create journal directory
+        local YEAR
+        YEAR=$(/bin/date +%Y)
+        mkdir -p "$VAULT_PATH/_PERSONAL/Journal/$YEAR"
+        ok "Journal directory ready"
+
+        echo ""
+        ok "Daily briefing installed. It will run on next laptop wake after 06:30."
+        info "Use /daily in Claude Code to respond to the briefing interactively."
+    else
+        info "Skipping daily briefing."
+    fi
+
+    # --- Guide for other automations ---
+    echo ""
+    header "Other Automations"
+    echo "The following guides teach you additional automation patterns:"
     echo ""
     echo "  Concepts:"
     echo "    level-2/README.md                        Overview"
@@ -491,7 +540,6 @@ run_level_2() {
     echo "    level-2/patterns/chained.md              One automation calls another"
     echo ""
     echo "  Recipes:"
-    echo "    level-2/recipes/morning-briefing.md      Daily vault scan + journal"
     echo "    level-2/recipes/deadline-scanner.md      Tag-based deadline tracking"
     echo "    level-2/recipes/inbox-processor.md       Weekly AI-powered filing"
     echo "    level-2/recipes/review-cycle.md          Weekly/monthly retrospectives"
@@ -502,8 +550,7 @@ run_level_2() {
     echo "    level-2/templates/task-scheduler.xml.tmpl     Windows skeleton"
     echo "    level-2/templates/automation-script.sh.tmpl   Script skeleton"
     echo ""
-    echo "When you are comfortable with Levels 0 and 1, read the guide"
-    echo "and tell Claude what automations you want. It knows the patterns."
+    echo "Read these when you are ready, then tell Claude what you want to automate."
 }
 
 # ═══════════════════════════════════════════

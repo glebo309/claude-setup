@@ -1,154 +1,102 @@
 # Recipe: Morning Briefing
 
-**Pattern:** on-wake | **Tokens:** HIGH (calls Claude)
+**Pattern:** on-wake | **Tokens:** HIGH (one Opus call per day)
 
-A script that fires when you open your laptop, scans your vault for deadlines, active threads, and recent journal entries, then uses Claude to write a concise morning briefing into today's journal note.
-
----
-
-## What It Does
-
-1. **Gather data** (zero tokens):
-   - Scan vault for `#due/YYYY-MM-DD` tags, group by urgency (overdue, today, next 3 days)
-   - Find active threads (`status: active` in frontmatter), flag stale ones (>10 days since edit)
-   - Read the last 3 days of journal entries for context
-   - Check for orphaned tasks (commitments mentioned but not tracked with `#due/`)
-
-2. **Synthesize** (spends tokens):
-   - Send all gathered data to Claude in a single prompt
-   - Claude writes a 5-7 line narrative briefing: what's urgent, what's stale, what to focus on
-   - On weekends: longer briefing with structural connections between recent work
-
-3. **Output**:
-   - Create today's journal note at `_PERSONAL/Journal/YYYY/YYYY-MM-DD.md`
-   - Write the briefing into the YAML header or a Briefing section
-   - Include a Threads table and Deadlines section
-   - Copy to a surface file (e.g. `Daily Briefing.md` at vault root) for quick access
-
-4. **Commit**: `git add` the journal note and commit
+A script that fires when you open your laptop, scans your vault for deadlines and commitments, then uses Claude to write a concise morning orientation into today's journal note.
 
 ---
 
-## Skeleton Script
+## How It Works
 
-```bash
-#!/bin/zsh
-set -euo pipefail
+### Phase 0: Data Gathering (zero tokens)
 
-VAULT="$HOME/Documents/SecondBrain"
-TODAY=$(date +%Y-%m-%d)
-YEAR=${TODAY%%-*}
-LOG="$HOME/.claude/logs/daily-briefing-$TODAY.log"
-JOURNAL="$VAULT/_PERSONAL/Journal/$YEAR/$TODAY.md"
+The script scans your vault with `grep` and `git log`. No API calls.
 
-log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG"; }
-log "Starting daily briefing"
+1. **Deadlines**: finds all `#due/YYYY-MM-DD` tags, groups by urgency
+   - **[LOUD]**: within 3 days AND no recent git activity on the file (you haven't touched it)
+   - **[RECURRING]**: appeared as overdue in 3+ consecutive briefings (stuck item)
+   - **[DEADLINE]**: normal upcoming deadline
+2. **Commitments**: scans recent journal entries and _INBOX for orphaned action items ("need to", "TODO", "will", etc.)
+3. **Recent notes**: reads the `*Notes:*` sections from the last 5 days of journal entries (your own words, authoritative over everything else)
+4. **Deduplication**: removes duplicate deadlines, upgrades LOUD to RECURRING when appropriate
 
-# Guard: only run once per day
-LOCKFILE="/tmp/briefing-$TODAY.lock"
-if [[ -f "$LOCKFILE" ]]; then log "Already ran today"; exit 0; fi
+### Phase 1: Claude Call (spends tokens)
 
-# Guard: only run after 6:30 AM
-HOUR=$(date +%H)
-if [[ "$HOUR" -lt 7 ]]; then log "Too early ($HOUR)"; exit 0; fi
+All gathered data is sent to Claude in a single prompt. Claude writes a 5-7 line morning orientation:
+- [LOUD] items first, in imperative tone ("what is blocking this?")
+- [RECURRING] items get one concrete suggestion or get parked
+- Normal deadlines with "so what" for today
+- Quiet days get "nothing pressing" plus one low-stakes suggestion
 
-touch "$LOCKFILE"
+### Output
 
-# --- Phase 0: Gather data ---
+- Creates `_PERSONAL/Journal/YYYY/YYYY-MM-DD.md` with YAML frontmatter, briefing narrative, and deadlines section
+- Copies to `Daily Briefing.md` at vault root for quick access
+- Git commits the journal entry
+- Sends a macOS notification
 
-# Deadlines
-DEADLINES=$(grep -rn '#due/' "$VAULT/_RESEARCH" "$VAULT/_CREATIVE" "$VAULT/_PERSONAL" \
-    --include="*.md" 2>/dev/null | head -50)
-
-# Active threads
-THREADS=$(grep -rl 'status: active' "$VAULT" --include="*.md" 2>/dev/null | head -20)
-
-# Recent journal entries
-RECENT_JOURNALS=""
-for i in 1 2 3; do
-    PAST=$(date -v-${i}d +%Y-%m-%d 2>/dev/null || date -d "$i days ago" +%Y-%m-%d)
-    PAST_YEAR=${PAST%%-*}
-    PAST_FILE="$VAULT/_PERSONAL/Journal/$PAST_YEAR/$PAST.md"
-    if [[ -f "$PAST_FILE" ]]; then
-        RECENT_JOURNALS="$RECENT_JOURNALS\n--- $PAST ---\n$(head -50 "$PAST_FILE")"
-    fi
-done
-
-# --- Phase 1: Claude synthesis ---
-
-mkdir -p "$(dirname "$JOURNAL")"
-
-# Build the prompt with all gathered data
-PROMPT="You are writing a morning briefing for $TODAY.
-
-DEADLINES:
-$DEADLINES
-
-ACTIVE THREADS:
-$THREADS
-
-RECENT JOURNAL:
-$RECENT_JOURNALS
-
-Write a 5-7 line morning briefing. Be specific about what is urgent and what to focus on today."
-
-# Call Claude (headless mode)
-BRIEFING=$(echo "$PROMPT" | claude --print 2>/dev/null)
-
-# --- Phase 2: Write journal note ---
-
-cat > "$JOURNAL" << EOF
----
-created: $TODAY
-tags:
-  - journal
-type: journal
 ---
 
-# $TODAY
+## The #due/#done Tag System
 
-$BRIEFING
+This is how tasks flow through the vault:
 
-## Threads
-
-(active threads listed here)
-
-## Deadlines
-
-(deadlines listed here)
-
-*Notes:*
-
-EOF
-
-# Copy to surface file
-cp "$JOURNAL" "$VAULT/Daily Briefing.md"
-
-# Git commit
-cd "$VAULT"
-git add "$JOURNAL" "Daily Briefing.md" 2>/dev/null
-git commit -m "Daily briefing $TODAY" 2>/dev/null || true
-
-log "Briefing complete"
+```
+Write a task anywhere:     - [ ] Submit report #due/2026-06-15
+Briefing picks it up:      [DEADLINE] IN 3d: Submit report (from [[ProjectPlan]])
+User says it's done:       /daily report is submitted
+Claude updates the source: - [x] Submit report #done/2026-06-15
+Tomorrow ignores it:       (lines with #done/ are filtered out)
 ```
 
+No special file format. No project management tool. Write `#due/YYYY-MM-DD` on any line in any `.md` file and the briefing finds it.
+
 ---
 
-## Trigger Setup
+## Installation
 
-**macOS (~/.wakeup):**
+The setup script installs this automatically when you choose Level 2:
+
 ```bash
-#!/bin/zsh
-/bin/zsh $HOME/.claude/scripts/daily-briefing.sh &
+./setup.sh --level 2
 ```
 
-See [on-wake.md](../patterns/on-wake.md) for the full setup.
+This installs:
+- `~/.claude/scripts/daily-briefing.sh` (the main script)
+- `~/.wakeup` (sleepwatcher trigger)
+- A LaunchAgent as boot fallback
+
+### Manual trigger
+
+```bash
+bash ~/.claude/scripts/daily-briefing.sh
+```
+
+The script is idempotent. Running it twice on the same day does nothing.
 
 ---
 
-## Customization Ideas
+## Responding to the Briefing
 
-- Add a "random old note" section: pick a random file >30 days old and include a snippet
-- Add experimental results: scan for `EXP_*` files modified in the last 3 days
-- Weekend mode: longer, more reflective briefing with cross-domain connections
-- Chain to a daily lesson script (podcast excerpt, quote, etc.)
+Use the `/daily` skill in Claude Code:
+
+```
+/daily                              # show briefing summary, ask for input
+/daily report done, finished it     # tick off a task
+/daily idea: try the new approach   # log a thought
+/daily skip the review for now      # defer something
+```
+
+Claude finds the matching `#due/` tag in the source file, changes it to `#done/`, ticks the checkbox, and logs it in the journal.
+
+---
+
+## Customization
+
+The script at `~/.claude/scripts/daily-briefing.sh` is plain bash + python. Modify freely:
+
+- **Change wake-up time**: edit the hour guard at the top (default: 06:30)
+- **Change Claude model**: replace `--model opus` with `--model sonnet` to save tokens
+- **Add weekend mode**: the script already detects weekends and sends a different prompt
+- **Chain another script**: add a call after the briefing (e.g., daily quote, RSS digest)
+- **Adjust lookahead**: deadlines scan 14 days ahead by default; change in the Python section
