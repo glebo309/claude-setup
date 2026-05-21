@@ -60,21 +60,17 @@ test_it "Skills have no remaining placeholders" "$?"
 [[ -f "$CLAUDE_DIR/scripts/notify.sh" ]]
 test_it "notify.sh exists" "$?"
 
-# Vault structure
+# Vault structure (always-present folders)
 [[ -d "$VAULT/_SYSTEM" ]]
 test_it "Vault: _SYSTEM/ exists" "$?"
 
-[[ -d "$VAULT/_RESEARCH" ]]
-test_it "Vault: _RESEARCH/ exists" "$?"
-
-[[ -d "$VAULT/_CREATIVE" ]]
-test_it "Vault: _CREATIVE/ exists" "$?"
-
-[[ -d "$VAULT/_PERSONAL" ]]
-test_it "Vault: _PERSONAL/ exists" "$?"
-
 [[ -d "$VAULT/_INBOX" ]]
 test_it "Vault: _INBOX/ exists" "$?"
+
+# Domain folders (at least one user-chosen domain folder exists)
+DOMAIN_COUNT=$(find "$VAULT" -maxdepth 1 -type d -name '_*' ! -name '_SYSTEM' ! -name '_INBOX' 2>/dev/null | wc -l | tr -d ' ')
+[[ "$DOMAIN_COUNT" -gt 0 ]]
+test_it "Vault: at least one domain folder exists ($DOMAIN_COUNT found)" "$?"
 
 [[ -f "$VAULT/CLAUDE.md" ]]
 test_it "Vault CLAUDE.md exists" "$?"

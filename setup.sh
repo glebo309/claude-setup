@@ -50,6 +50,9 @@ USER_ROLE="$USER_ROLE"
 USER_DOMAIN="$USER_DOMAIN"
 USER_EMAIL="$USER_EMAIL"
 VAULT_PATH="$VAULT_PATH"
+VAULT_PRESET="$VAULT_PRESET"
+VAULT_DOMAINS="$VAULT_DOMAINS"
+USE_ZOTERO="$USE_ZOTERO"
 TTYD_PORT="$TTYD_PORT"
 EOF
     ok "Config saved to $CONFIG_FILE"
@@ -99,6 +102,59 @@ run_interview() {
         fi
     fi
 
+    # Vault structure
+    echo ""
+    info "Choose your vault's top-level folder structure."
+    info "_INBOX/ (quick capture) and _SYSTEM/ (infrastructure) are always included."
+    echo ""
+    echo "  1) Academic     _RESEARCH/  _CREATIVE/  _PERSONAL/"
+    echo "  2) Simple       _PERSONAL/  _WORK/"
+    echo "  3) Custom       You pick the folder names"
+    echo ""
+    ask "Structure preset" "2" VAULT_PRESET
+
+    case "$VAULT_PRESET" in
+        1)
+            VAULT_DOMAINS="_RESEARCH:Research, papers, lab work, academic career:Science or work-related;_CREATIVE:Creative projects, writing, published output:Created for others to see;_PERSONAL:Personal life, journal, goals, health:Private life"
+            ;;
+        2)
+            VAULT_DOMAINS="_PERSONAL:Personal life, journal, goals, hobbies:Private, not work-related;_WORK:Work projects, notes, professional development:Work-related"
+            ;;
+        3)
+            VAULT_DOMAINS=""
+            info "Enter folder names. We add the _ prefix automatically. Empty line to finish."
+            while true; do
+                echo -en "${BOLD}Folder name (or Enter to finish)${RESET}: "
+                read -r fname
+                [[ -z "$fname" ]] && break
+                fname="_$(echo "${fname#_}" | tr '[:lower:]' '[:upper:]')"
+                echo -en "${BOLD}  Short purpose${RESET}: "
+                read -r fpurpose
+                [[ -n "$VAULT_DOMAINS" ]] && VAULT_DOMAINS="${VAULT_DOMAINS};"
+                VAULT_DOMAINS="${VAULT_DOMAINS}${fname}:${fpurpose}:${fpurpose}"
+            done
+            if [[ -z "$VAULT_DOMAINS" ]]; then
+                warn "No folders entered. Using Simple preset."
+                VAULT_DOMAINS="_PERSONAL:Personal life, journal, goals, hobbies:Private, not work-related;_WORK:Work projects, notes, professional development:Work-related"
+            fi
+            ;;
+        *)
+            warn "Unknown preset. Using Simple."
+            VAULT_PRESET="2"
+            VAULT_DOMAINS="_PERSONAL:Personal life, journal, goals, hobbies:Private, not work-related;_WORK:Work projects, notes, professional development:Work-related"
+            ;;
+    esac
+
+    # Zotero
+    echo ""
+    if confirm "Do you use Zotero for reference management?"; then
+        USE_ZOTERO="yes"
+        info "The paper skill will include Zotero integration."
+    else
+        USE_ZOTERO="no"
+        info "Skipping Zotero. The paper skill will work without it."
+    fi
+
     # Projects
     echo ""
     info "List your code projects so Claude knows where they live."
@@ -122,6 +178,10 @@ run_interview() {
     echo "  Domain:   $USER_DOMAIN"
     echo "  Email:    ${USER_EMAIL:-none}"
     echo "  Vault:    $VAULT_PATH"
+    echo "  Structure: preset $VAULT_PRESET"
+    IFS=';' read -rA _sum_domains <<< "$VAULT_DOMAINS"
+    for _d in "${_sum_domains[@]}"; do echo "             ${_d%%:*}/"; done
+    echo "  Zotero:   $USE_ZOTERO"
     echo "  Projects: ${#PROJECTS[@]} registered"
     for p in "${PROJECTS[@]:-}"; do
         [[ -n "$p" ]] && echo "            $p"
@@ -205,6 +265,62 @@ run_level_0() {
     echo ""
     info "Running Level 0 tests..."
     bash "$REPO_DIR/level-0/test-level-0.sh" "$TTYD_PORT"
+}
+
+# ═══════════════════════════════════════════
+# Skill dependency installer
+# ═══════════════════════════════════════════
+
+install_skill_deps() {
+    header "Installing Skill Dependencies"
+
+    # yt-dlp (youtube skill)
+    if command -v yt-dlp &>/dev/null; then
+        ok "yt-dlp already installed"
+    else
+        info "Installing yt-dlp (for YouTube transcripts)..."
+        brew install yt-dlp
+        ok "yt-dlp installed"
+    fi
+
+    # pymupdf (pdf skill)
+    if python3 -c "import pymupdf" 2>/dev/null; then
+        ok "pymupdf already installed"
+    else
+        info "Installing pymupdf (for PDF to markdown)..."
+        pip3 install --quiet pymupdf
+        ok "pymupdf installed"
+    fi
+
+    # pandoc (export skill)
+    if command -v pandoc &>/dev/null; then
+        ok "pandoc already installed"
+    else
+        info "Installing pandoc (for Word/LaTeX export)..."
+        brew install pandoc
+        ok "pandoc installed"
+    fi
+
+    # webclaw (website skill)
+    if command -v webclaw &>/dev/null; then
+        ok "webclaw already installed"
+    else
+        info "Installing webclaw (for web page scraping)..."
+        brew install webclaw 2>/dev/null || pip3 install --quiet webclaw
+        ok "webclaw installed"
+    fi
+
+    # Zotero (paper skill) -- only if user opted in
+    if [[ "${USE_ZOTERO:-no}" == "yes" ]]; then
+        if command -v zotero-cli &>/dev/null; then
+            ok "zotero-cli already installed"
+        else
+            info "Installing zotero-cli (for paper pipeline)..."
+            pip3 install --quiet zotero-cli
+            ok "zotero-cli installed"
+        fi
+        info "Make sure Zotero desktop is running with the Local REST API plugin."
+    fi
 }
 
 # ═══════════════════════════════════════════
@@ -298,16 +414,44 @@ run_level_1() {
         "$REPO_DIR/level-1/claude-md.tmpl" > "$CLAUDE_DIR/CLAUDE.md"
     ok "CLAUDE.md generated"
 
+    # --- Skill dependencies ---
+    install_skill_deps
+
     # --- Vault setup ---
     info "Setting up vault structure..."
-    mkdir -p "$VAULT_PATH"/{_SYSTEM,_RESEARCH,_CREATIVE,_PERSONAL/Journal,_INBOX}
+    mkdir -p "$VAULT_PATH"/{_SYSTEM,_INBOX}
 
-    # Vault CLAUDE.md
-    sed -e "s|__USER_NAME__|${USER_NAME}|g" \
-        -e "s|__USER_ROLE__|${USER_ROLE}|g" \
-        -e "s|__USER_DOMAIN__|${USER_DOMAIN}|g" \
-        -e "s|__VAULT_PATH__|${VAULT_PATH}|g" \
-        "$REPO_DIR/level-1/vault-claude-md.tmpl" > "$VAULT_PATH/CLAUDE.md"
+    # Create domain folders from VAULT_DOMAINS (semicolon-separated, colon-delimited fields)
+    IFS=';' read -rA domain_entries <<< "$VAULT_DOMAINS"
+    local VAULT_DOMAIN_ROWS=""
+    for entry in "${domain_entries[@]}"; do
+        local dname="${entry%%:*}"
+        local rest="${entry#*:}"
+        local dpurpose="${rest%%:*}"
+        local drule="${rest##*:}"
+        mkdir -p "$VAULT_PATH/$dname"
+        VAULT_DOMAIN_ROWS="${VAULT_DOMAIN_ROWS}| \`${dname}/\` | ${dpurpose} | ${drule} |
+"
+        ok "  $dname/"
+    done
+
+    # Vault CLAUDE.md (use python3 for multi-line domain rows)
+    python3 - "$REPO_DIR/level-1/vault-claude-md.tmpl" "$VAULT_PATH/CLAUDE.md" \
+        "$USER_NAME" "$USER_ROLE" "$USER_DOMAIN" "$VAULT_PATH" "$VAULT_DOMAIN_ROWS" << 'PYEOF'
+import sys
+tmpl = open(sys.argv[1]).read()
+replacements = {
+    '__USER_NAME__': sys.argv[3],
+    '__USER_ROLE__': sys.argv[4],
+    '__USER_DOMAIN__': sys.argv[5],
+    '__VAULT_PATH__': sys.argv[6],
+    '__VAULT_DOMAIN_ROWS__': sys.argv[7],
+}
+for k, v in replacements.items():
+    tmpl = tmpl.replace(k, v)
+with open(sys.argv[2], 'w') as f:
+    f.write(tmpl)
+PYEOF
     ok "Vault CLAUDE.md generated"
 
     # _SYSTEM files
