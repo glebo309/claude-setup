@@ -1,8 +1,34 @@
 # Level 2: Automations
 
-Automations make the harness work while you are not at the keyboard. They scan your vault, generate briefings, send notifications, and file notes on a schedule.
-
 **Do not start here.** Get comfortable with Level 0 (terminal in browser) and Level 1 (skills, vault, CLAUDE.md) first. Automations build on top of a working harness.
+
+---
+
+## Why Automations?
+
+Without automations, the AI harness only works when you are sitting at the keyboard typing commands. That is already powerful, but it means:
+- You have to remember to check your deadlines
+- You have to remember to review what happened this week
+- You have to ask Claude to scan your vault every time you want a summary
+- Nothing happens while you sleep, commute, or step away
+
+Automations remove the "you have to remember" part. They turn the harness from a tool you use into a system that works alongside you.
+
+## What Are Automations For?
+
+Think of automations as habits you give to your AI system:
+
+**Daily briefing** (the big one): Every morning when you open your laptop, a script scans your vault for deadlines, overdue items, and commitments. It sends all that data to Claude, which writes a 5-7 line morning orientation into your journal. By the time you have coffee, you know what needs attention today. You respond via `/daily` in the terminal: "report is done, skip the review, idea: try X instead." Claude updates the source files, ticks off tasks, and logs your notes.
+
+**Weekly reflection**: Every Sunday evening, a script reads your week of journal entries and completed tasks, then asks Claude to write a short retrospective. What moved forward? What stalled? Was this a building week or a scattered one?
+
+**Monthly reflection**: On the 1st of each month, a script reads all weekly reflections and writes a higher-level summary. Patterns across weeks, progress on larger goals, things that keep getting deferred.
+
+**Deadline scanner** (zero tokens): Three times a day, a script greps for `#due/` tags and sends you a notification if anything is overdue or due today. No AI call, just pattern matching and a notification.
+
+**Inbox processor** (weekly): Every Monday, Claude reads unprocessed notes in `_INBOX/` and suggests where to file them.
+
+The first three (daily, weekly, monthly) are installed by the setup script. The rest are guides you can build yourself.
 
 ---
 
@@ -10,10 +36,10 @@ Automations make the harness work while you are not at the keyboard. They scan y
 
 An automation has four parts:
 
-1. **Trigger** -- what starts it (time, event, file change)
-2. **Script** -- what it does (bash script, possibly calling Claude)
-3. **Output** -- where the result goes (vault file, notification, email, git commit)
-4. **Log** -- proof it ran (timestamped log file)
+1. **Trigger**: what starts it (time of day, laptop wake, file change)
+2. **Script**: what it does (a bash script that may call Claude)
+3. **Output**: where the result goes (vault file, notification, git commit)
+4. **Log**: proof it ran (timestamped log file in `~/.claude/logs/`)
 
 Some automations cost zero tokens (they just grep files and send notifications). Others spend tokens by calling Claude to synthesize or analyze.
 

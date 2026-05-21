@@ -526,6 +526,64 @@ run_level_2() {
         info "Skipping daily briefing."
     fi
 
+    # --- Weekly Reflection ---
+    echo ""
+    info "The weekly reflection reads your daily journal entries and #done tags,"
+    info "then asks Claude (Sonnet) to write a short retrospective every Sunday evening."
+    echo ""
+    if confirm "Install the weekly reflection? (runs Sundays at 20:00)"; then
+        local SCRIPTS_DIR="$HOME/.claude/scripts"
+
+        sed -e "s|__VAULT__|${VAULT_PATH}|g" \
+            -e "s|__USER_NAME__|${USER_NAME}|g" \
+            "$REPO_DIR/level-2/scripts/weekly-reflection.sh" > "$SCRIPTS_DIR/weekly-reflection.sh"
+        chmod +x "$SCRIPTS_DIR/weekly-reflection.sh"
+        ok "weekly-reflection.sh installed"
+
+        local PLIST_NAME="com.$(whoami).weekly-reflection"
+        local PLIST_PATH="$HOME/Library/LaunchAgents/${PLIST_NAME}.plist"
+        if [[ -f "$PLIST_PATH" ]]; then
+            ok "Weekly LaunchAgent already exists"
+        else
+            sed -e "s|__LABEL__|${PLIST_NAME}|g" \
+                -e "s|__HOME__|${HOME}|g" \
+                "$REPO_DIR/level-2/scripts/launchagent-weekly.plist.tmpl" > "$PLIST_PATH"
+            launchctl load "$PLIST_PATH" 2>/dev/null || true
+            ok "Weekly LaunchAgent created (Sundays at 20:00)"
+        fi
+    else
+        info "Skipping weekly reflection."
+    fi
+
+    # --- Monthly Reflection ---
+    echo ""
+    info "The monthly reflection reads all weekly reflections and daily notes,"
+    info "then asks Claude (Sonnet) for a higher-level summary on the 1st of each month."
+    echo ""
+    if confirm "Install the monthly reflection? (runs 1st of each month at 09:00)"; then
+        local SCRIPTS_DIR="$HOME/.claude/scripts"
+
+        sed -e "s|__VAULT__|${VAULT_PATH}|g" \
+            -e "s|__USER_NAME__|${USER_NAME}|g" \
+            "$REPO_DIR/level-2/scripts/monthly-reflection.sh" > "$SCRIPTS_DIR/monthly-reflection.sh"
+        chmod +x "$SCRIPTS_DIR/monthly-reflection.sh"
+        ok "monthly-reflection.sh installed"
+
+        local PLIST_NAME="com.$(whoami).monthly-reflection"
+        local PLIST_PATH="$HOME/Library/LaunchAgents/${PLIST_NAME}.plist"
+        if [[ -f "$PLIST_PATH" ]]; then
+            ok "Monthly LaunchAgent already exists"
+        else
+            sed -e "s|__LABEL__|${PLIST_NAME}|g" \
+                -e "s|__HOME__|${HOME}|g" \
+                "$REPO_DIR/level-2/scripts/launchagent-monthly.plist.tmpl" > "$PLIST_PATH"
+            launchctl load "$PLIST_PATH" 2>/dev/null || true
+            ok "Monthly LaunchAgent created (1st of month at 09:00)"
+        fi
+    else
+        info "Skipping monthly reflection."
+    fi
+
     # --- Guide for other automations ---
     echo ""
     header "Other Automations"

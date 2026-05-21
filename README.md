@@ -51,17 +51,21 @@ Configures Claude Code with your identity, skills, settings, and vault integrati
 
 **Result:** Claude Code knows who you are, understands your vault, and responds to custom skills.
 
-### Level 2: Automations (Guide)
+### Level 2: Automations
 
-Not a script. A guide that teaches you the automation patterns so you can build your own.
+Installs the daily/weekly/monthly automation loop, plus guides for building your own.
 
-**What it contains:**
+**What it installs (each optional):**
+- **Daily briefing**: fires on laptop wake, scans vault for `#due/` deadlines and commitments, calls Claude to write a morning orientation into your journal
+- **Weekly reflection**: runs Sunday evening, reads the week's journal entries and `#done/` items, writes a retrospective
+- **Monthly reflection**: runs 1st of each month, reads all weekly reflections, writes a higher-level summary
+
+**What it contains (guides):**
 - Pattern guides: on-wake, scheduled, file-watch, persistent service, chained
-- Recipe examples: morning briefing, deadline scanner, inbox processor, review cycle
-- Skeleton templates for LaunchAgents and scripts
+- Recipe examples with templates for LaunchAgents and scripts
 - Cross-platform notes (macOS LaunchAgents vs Windows Task Scheduler)
 
-**Result:** You understand how to make the agent work while you sleep.
+**Result:** The agent scans your vault daily, writes briefings, tracks what you finish, and reflects on your progress weekly and monthly. All in your journal folder.
 
 ---
 
@@ -104,7 +108,15 @@ claude-setup/
 │   └── daily/SKILL.md               # Interactive daily briefing
 │
 ├── level-2/
-│   ├── README.md                     # What are automations, when to add them
+│   ├── README.md                     # What are automations, why, and how
+│   ├── scripts/
+│   │   ├── daily-briefing.sh         # Morning orientation (on wake)
+│   │   ├── weekly-reflection.sh      # Week retrospective (Sunday)
+│   │   ├── monthly-reflection.sh     # Month summary (1st of month)
+│   │   ├── wakeup.sh                 # Sleepwatcher trigger for briefing
+│   │   ├── launchagent-briefing.plist.tmpl
+│   │   ├── launchagent-weekly.plist.tmpl
+│   │   └── launchagent-monthly.plist.tmpl
 │   ├── patterns/
 │   │   ├── on-wake.md                # Trigger on laptop open/unlock
 │   │   ├── scheduled.md              # Trigger at specific times
@@ -138,10 +150,23 @@ claude-setup/
 
 ---
 
+## Platform
+
+**This is a macOS setup.** The scripts use `launchd`, `sleepwatcher`, `terminal-notifier`, Homebrew, and BSD `date` flags. None of this runs on Windows or Linux as-is.
+
+If you want to run this on Windows or Linux, the concepts transfer but the plumbing does not. You will need to replace:
+- LaunchAgents with Task Scheduler (Windows) or systemd timers (Linux)
+- `sleepwatcher` with Task Scheduler "on workstation unlock" (Windows) or `systemd-logind` (Linux)
+- `terminal-notifier` with BurntToast (Windows PowerShell) or `notify-send` (Linux)
+- Homebrew with your platform's package manager
+- BSD `date -v` flags with GNU `date -d`
+
+The `level-2/templates/` folder has a Windows Task Scheduler XML skeleton to get started.
+
 ## Requirements
 
-- macOS (primary target) or Windows with WSL
-- Homebrew (macOS)
+- macOS (Ventura or later recommended)
+- Homebrew
 - Node.js (for Claude Code)
 - Obsidian (with Local REST API plugin enabled)
 - Git
