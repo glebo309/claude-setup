@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "VAULT=\"$HOME/Documents/SecondBrain\"; TODAY=$(date +%Y-%m-%d); YEAR=${TODAY%%-*}; JOURNAL=\"$VAULT/_PERSONAL/Journal/$YEAR/$TODAY.md\"; SURFACE=\"$VAULT/Daily Briefing.md\"; if echo \"$CLAUDE_FILE_PATHS\" | grep -q \"$JOURNAL\"; then cp \"$JOURNAL\" \"$SURFACE\" 2>/dev/null; fi",
+            "command": "VAULT=\"__VAULT__\"; TODAY=$(date +%Y-%m-%d); YEAR=${TODAY%%-*}; JOURNAL=\"$VAULT/_PERSONAL/Journal/$YEAR/$TODAY.md\"; SURFACE=\"$VAULT/Daily Briefing.md\"; if echo \"$CLAUDE_FILE_PATHS\" | grep -q \"$JOURNAL\"; then cp \"$JOURNAL\" \"$SURFACE\" 2>/dev/null; fi",
             "async": true
           }
         ]

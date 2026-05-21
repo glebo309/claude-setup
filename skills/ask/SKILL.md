@@ -89,8 +89,8 @@ User: "Add a tracker for my experiments"
 Claude: *immediately creates a markdown file with a table and YAML frontmatter*
 
 **Good (/ask mode):**
-User: "/ask add a tracker for my experiments"
+User: "/ask add a tracker for my projects"
 Claude: "A few things before I build this:
-1. Which experiments: HalB, PAL, or all active projects?
-2. What do you want to track per experiment: dates, results, status, reagents?
-3. Should this live as a note in the project folder, or as a new board view?"
+1. Which projects: all active ones, or specific ones?
+2. What do you want to track per project: dates, milestones, status, notes?
+3. Should this live as a note in the project folder, or as a new dashboard view?"

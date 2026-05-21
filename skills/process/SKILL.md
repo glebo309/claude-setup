@@ -32,7 +32,7 @@ Determine the domain:
 - File is under `_PERSONAL/` or is about personal development/hobbies → **personal**
 - File is in `_INBOX/` or unclear → infer from content, ask if ambiguous
 
-If `--for <project>` was given, that's the primary lens for relevance (e.g. `--for Experiential_Monism`, `--for HalB`, `--for Fermentation`).
+If `--for <project>` was given, that's the primary lens for relevance (e.g. `--for MyProject`, `--for ThesisWork`).
 
 ### Step 1 — Extract key concepts from the source
 
@@ -42,9 +42,9 @@ Also extract a flat list of **entity terms** (people, methods, enzymes, concepts
 
 ### Step 1.5 — Source Credibility Gate (external sources only)
 
-**Skip this step if the source is self-authored** (Glenn's own notes, journal entries, project files, or drafts). Only apply to external material: videos, podcasts, articles, books, papers, transcripts from other people.
+**Skip this step if the source is self-authored** (the user's own notes, journal entries, project files, or drafts). Only apply to external material: videos, podcasts, articles, books, papers, transcripts from other people.
 
-How to detect: if the file has `source_type` frontmatter (video, podcast, article, book, paper), it's external. If it's a transcript of someone else talking, it's external. If it's Glenn's own writing or notes, skip to Step 2.
+How to detect: if the file has `source_type` frontmatter (video, podcast, article, book, paper), it's external. If it's a transcript of someone else talking, it's external. If it's the user's own writing or notes, skip to Step 2.
 
 #### A. Source assessment
 
@@ -210,7 +210,7 @@ status: processed
 
 # <Source Title> — Key Connections
 
-**One-line verdict:** <What this source is and the single most important takeaway for Glenn's work>
+**One-line verdict:** <What this source is and the single most important takeaway for your work>
 
 **Source confidence:** <High / Medium / Low> — <one sentence justifying the rating, e.g. "peer-reviewed enzyme study with robust controls" or "promotional YouTube video mixing valid observations with unsupported doom predictions">
 
@@ -218,7 +218,7 @@ status: processed
 
 ## Why This Matters
 
-<2-4 sentences on why this source is relevant — not what it says, but why Glenn should care given his current projects and interests. Reference specific projects/notes.>
+<2-4 sentences on why this source is relevant — not what it says, but why the user should care given their current projects and interests. Reference specific projects/notes.>
 
 ## Key Ideas
 
@@ -245,7 +245,7 @@ status: processed
 
 ## Cross-Domain Bridges
 
-<List any surprising connections that cross domain boundaries — e.g., a personal development concept that maps to a research method, or a philosophy idea that connects to a biocatalysis problem. These are the highest-value insights. If none exist, omit this section.>
+<List any surprising connections that cross domain boundaries — e.g., a personal development concept that maps to a research method, or a creative idea that connects to a work problem. These are the highest-value insights. If none exist, omit this section.>
 
 ## Open Questions
 
@@ -260,15 +260,15 @@ Determine destination using the vault's decision rule and the source's `source_t
 
 | Content about... | source_type | Move to... |
 |---|---|---|
-| Science, PhD, enzymes, lab | paper | `_RESEARCH/Literature/` |
-| Science, PhD, enzymes, lab | video/podcast/book | `_RESEARCH/Sources/{type}/` |
-| Philosophy, EM framework | any | `_CREATIVE/Experiential_Monism/90_Reference/{type}/` |
-| Psychedelics | any | `_CREATIVE/Web_Of_Psychedelics/04_REFERENCES/{type}/` |
-| Biocatalysis (educational) | any | `_CREATIVE/Web_Of_Biocatalysis/library/literature/` |
+| Work / research / professional | paper | `_WORK/Literature/` or `_RESEARCH/Literature/` |
+| Work / research / professional | video/podcast/book | `_WORK/Sources/{type}/` or `_RESEARCH/Sources/{type}/` |
+| Creative projects | any | The relevant project folder under `_CREATIVE/` |
 | Personal dev, hobbies, life | video/podcast | `_PERSONAL/Sources/video_&_podcasts/` |
 | Personal dev, hobbies, life | book | `_PERSONAL/Sources/books/` |
 | Personal dev, hobbies, life | article | `_PERSONAL/Sources/articles_&_websites/` |
 | Unclear / multi-domain | any | `_PERSONAL/Sources/{type}/` (safe default) |
+
+Adapt folder names to the user's actual vault structure. Read the vault CLAUDE.md to learn the domain folders.
 
 Create destination directory if it doesn't exist. Move both files:
 
@@ -304,11 +304,11 @@ Key bridge: <the single most interesting cross-connection>
 - **Use `[[wikilinks]]`** — Obsidian format, filename only (not `[[folder/file]]`).
 - **YAML frontmatter is required** — follow the vault standard (created, tags, type).
 - **`NOTES_` prefix** — always. This is how the vault distinguishes AI-generated analysis from source material.
-- **Be specific in connections** — "relates to [[HalB project]]" is useless. "This enzyme screening approach parallels the combinatorial strategy in [[HalB project]] but uses computational pre-filtering instead of random mutagenesis" is useful.
+- **Be specific in connections** — "relates to [[MyProject]]" is useless. "This approach parallels the strategy in [[MyProject]] but uses computational pre-filtering instead of manual selection" is useful.
 - **Cross-domain connections are gold** — if a personal development concept maps to a research methodology, or a philosophy framework illuminates a scientific problem, always highlight it.
 - **Don't invent connections** — if the link is tenuous, say so. "Weak connection:" is fine. Fake connections waste time.
 - **Respect the source's actual content** — don't project ideas onto it. Extract what's there, then connect it.
 - **No em dashes or double-hyphen substitutes in output files.** Rewrite sentences to avoid them. Use colons, commas, periods, or parentheses instead.
 - **Never make bad sources look good.** The credibility gate exists to protect vault quality. If a source is mostly hype, the NOTES_ file should reflect that honestly. Do not spin low-quality claims into impressive-sounding connections. A short, honest NOTES_ file beats a long, flattering one.
 - **Connections must survive the credibility gate.** Only ideas that passed the triage in Step 1.5 get "Connects to" lines. Do not connect dropped claims to vault notes just because a keyword matches.
-- **Self-authored content is trusted.** Glenn's own notes, drafts, and project files skip the credibility gate entirely. The filter is for external material only.
+- **Self-authored content is trusted.** The user's own notes, drafts, and project files skip the credibility gate entirely. The filter is for external material only.

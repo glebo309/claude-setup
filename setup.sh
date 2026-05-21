@@ -336,13 +336,13 @@ run_level_1() {
     # --- Settings ---
     if [[ -f "$CLAUDE_DIR/settings.json" ]]; then
         if confirm "settings.json already exists. Overwrite?"; then
-            cp "$REPO_DIR/level-1/settings.json" "$CLAUDE_DIR/settings.json"
+            sed -e "s|__VAULT__|${VAULT_PATH}|g" "$REPO_DIR/level-1/settings.json" > "$CLAUDE_DIR/settings.json"
             ok "settings.json installed"
         else
             warn "Skipping settings.json"
         fi
     else
-        cp "$REPO_DIR/level-1/settings.json" "$CLAUDE_DIR/settings.json"
+        sed -e "s|__VAULT__|${VAULT_PATH}|g" "$REPO_DIR/level-1/settings.json" > "$CLAUDE_DIR/settings.json"
         ok "settings.json installed"
     fi
 
